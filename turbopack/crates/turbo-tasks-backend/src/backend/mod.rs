@@ -1135,7 +1135,7 @@ impl Backend for TurboTasksBackend {
         _: TaskId,
         _: &dyn TurboTasksBackendApi<Self>,
     ) -> AutoMap<RawVc, i32, BuildHasherDefault<FxHasher>, 1> {
-        todo!()
+        Default::default()
     }
 
     fn emit_collectible(
@@ -1145,7 +1145,7 @@ impl Backend for TurboTasksBackend {
         _: TaskId,
         _: &dyn TurboTasksBackendApi<Self>,
     ) {
-        todo!()
+        // todo!("emit_collectible");
     }
 
     fn unemit_collectible(
@@ -1156,7 +1156,7 @@ impl Backend for TurboTasksBackend {
         _: TaskId,
         _: &dyn TurboTasksBackendApi<Self>,
     ) {
-        todo!()
+        // todo!("emit_collectible");
     }
 
     fn update_task_cell(
@@ -1214,7 +1214,8 @@ impl Backend for TurboTasksBackend {
         }
         task_id
     }
+
     fn dispose_root_task(&self, _: TaskId, _: &dyn TurboTasksBackendApi<Self>) {
-        todo!()
+        // todo!("dispose_root_task");
     }
 }
