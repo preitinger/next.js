@@ -109,6 +109,13 @@ impl InProgressCellState {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+pub struct AggregationNumber {
+    pub base: u32,
+    pub distance: u32,
+    pub effective: u32,
+}
+
 #[derive(Debug, Clone, KeyValuePair, Serialize, Deserialize)]
 pub enum CachedDataItem {
     // Output
@@ -176,7 +183,7 @@ pub enum CachedDataItem {
 
     // Aggregation Graph
     AggregationNumber {
-        value: u32,
+        value: AggregationNumber,
     },
     Follower {
         task: TaskId,
