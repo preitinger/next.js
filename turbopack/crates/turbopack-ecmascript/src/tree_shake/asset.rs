@@ -11,7 +11,7 @@ use turbopack_core::{
 
 use super::{
     chunk_item::EcmascriptModulePartChunkItem, get_part_id, part_of_module, split, split_module,
-    Key, PartId, SplitResult,
+    PartId, SplitResult,
 };
 use crate::{
     chunk::{EcmascriptChunkPlaceable, EcmascriptExports},
@@ -155,73 +155,19 @@ impl Module for EcmascriptModulePartAsset {
 
         let analyze = analyze(self.full_module, self.part).await?;
 
-        let (deps, entrypoints) = match &*split_data {
-            SplitResult::Ok {
-                deps, entrypoints, ..
-            } => (deps, entrypoints),
+        let deps = match &*split_data {
+            SplitResult::Ok { deps, .. } => deps,
             SplitResult::Failed { .. } => return Ok(analyze.references),
         };
 
         // Facade depends on evaluation and re-exports
         if matches!(&*self.part.await?, ModulePart::Facade) {
-            let mut references = vec![];
-
-            let reference = Vc::upcast(SingleModuleReference::new(
-                Vc::upcast(EcmascriptModulePartAsset::new(
-                    self.full_module,
-                    ModulePart::evaluation(),
-                )),
-                Vc::cell("ecmascript module evaluation".into()),
-            ));
-
-            references.push(reference);
-
-            let reference = Vc::upcast(SingleModuleReference::new(
-                Vc::upcast(EcmascriptModulePartAsset::new(
-                    self.full_module,
-                    ModulePart::exports(),
-                )),
-                Vc::cell("ecmascript reexports".into()),
-            ));
-
-            references.push(reference);
-
-            references.extend(analyze.references.await?.iter().cloned());
-
-            return Ok(Vc::cell(references));
+            return Ok(analyze.references);
         }
 
         // ModulePart::Exports contains all reexports and a reexport of the Locals
         if matches!(&*self.part.await?, ModulePart::Exports) {
-            let mut references = vec![];
-
-            for key in entrypoints.keys() {
-                if let Key::Export(e) = key {
-                    let reference = Vc::upcast(SingleModuleReference::new(
-                        Vc::upcast(EcmascriptModulePartAsset::new(
-                            self.full_module,
-                            ModulePart::export(e.clone()),
-                        )),
-                        Vc::cell(format!("ecmascript export '{e}'").into()),
-                    ));
-
-                    references.push(reference);
-                }
-            }
-
-            let reference = Vc::upcast(SingleModuleReference::new(
-                Vc::upcast(EcmascriptModulePartAsset::new(
-                    self.full_module,
-                    ModulePart::star_reexports(),
-                )),
-                Vc::cell("reexport".into()),
-            ));
-
-            references.push(reference);
-
-            references.extend(analyze.references.await?.iter().cloned());
-
-            return Ok(Vc::cell(references));
+            return Ok(analyze.references);
         }
 
         if matches!(&*self.part.await?, ModulePart::StarReexports) {
